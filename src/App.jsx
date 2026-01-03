@@ -1,35 +1,39 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [count, setCount] = useState(0);
+  const [name, setName] = useState("");
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div style={{ maxWidth: 520, margin: "40px auto", fontFamily: "system-ui" }}>
+      <h1>My First React App</h1>
+      <p>Built with Vite + React</p>
 
-export default App
+      <hr />
+
+      <h2>Counter</h2>
+      <p>Count: <b>{count}</b></p>
+      <button onClick={() => setCount((c) => c + 1)}>+1</button>
+      <button onClick={() => setCount((c) => c - 1)} style={{ marginLeft: 8 }}>
+        -1
+      </button>
+      <button onClick={() => setCount(0)} style={{ marginLeft: 8 }}>
+        Reset
+      </button>
+
+      <hr style={{ margin: "24px 0" }} />
+
+      <h2>Greeting</h2>
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Type your name"
+        style={{ padding: 8, width: "100%", boxSizing: "border-box" }}
+      />
+      <p style={{ marginTop: 12 }}>
+        {name ? `Hello, ${name}! 👋` : "Say hi by typing your name above."}
+      </p>
+    </div>
+  );
+}
