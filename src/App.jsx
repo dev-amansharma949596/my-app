@@ -1,39 +1,31 @@
-import { useState } from "react";
-import "./App.css";
+import { Routes, Route, Navigate } from "react-router-dom";
+import DashboardLayout from "./layouts/DashboardLayout";
+import RequireAuth from "./routes/RequireAuth";
 
+import Home from "./pages/Home";
+import DoctorsPublic from "./pages/DoctorsPublic";
+import DoctorsAdmin from "./pages/admin/DoctorsAdmin";
+import DashboardPage from "../src/layouts/DashboardLayout";
+import AppointmentsAdmin from "./pages/admin/AppointmentsAdmin";
+import Users from "./pages/admin/Users";
 export default function App() {
-  const [count, setCount] = useState(0);
-  const [name, setName] = useState("");
-
   return (
-    <div style={{ maxWidth: 520, margin: "40px auto", fontFamily: "system-ui" }}>
-      <h1>My First React App</h1>
-      <p>Built with Vite + React</p>
+    <Routes>
+      {/* ✅ Public frontend home */}
+      <Route path="/" element={<Home />} />
+      <Route path="/doctors" element={<DoctorsPublic />} /> 
 
-      <hr />
+      {/* ✅ Protected dashboard area */}
+      <Route element={<RequireAuth />}>
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} /> 
+          <Route path="/dashboard/users" element={<Users />} />
+          <Route path="/dashboard/doctors" element={<DoctorsAdmin />} />
+          <Route path="/dashboard/appointments" element={<AppointmentsAdmin />} />
+        </Route>
+      </Route>
 
-      <h2>Counter</h2>
-      <p>Count: <b>{count}</b></p>
-      <button onClick={() => setCount((c) => c + 1)}>+1</button>
-      <button onClick={() => setCount((c) => c - 1)} style={{ marginLeft: 8 }}>
-        -1
-      </button>
-      <button onClick={() => setCount(0)} style={{ marginLeft: 8 }}>
-        Reset
-      </button>
-
-      <hr style={{ margin: "24px 0" }} />
-
-      <h2>Greeting</h2>
-      <input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Type your name"
-        style={{ padding: 8, width: "100%", boxSizing: "border-box" }}
-      />
-      <p style={{ marginTop: 12 }}>
-        {name ? `Hello, ${name}! 👋` : "Say hi by typing your name above."}
-      </p>
-    </div>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
