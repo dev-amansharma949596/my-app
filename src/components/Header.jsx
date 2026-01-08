@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; 
-import { useAuth } from "../context/AuthContext"; 
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import {
   Box,
   Button,
@@ -10,32 +10,41 @@ import {
   DialogActions,
   TextField,
   Typography,
-} from "@mui/material"; 
+} from "@mui/material";
 
-export default function Home() {
-   const [open, setOpen] = useState(false);
+export default function Header() {
+  const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { user, loading, login, logout } = useAuth();
 
   const onSubmit = async () => {
     setSubmitting(true);
     setError("");
     try {
-      await login(email, password);      // ✅ calls backend, sets cookie, loads user
+      await login(email, password); // ✅ calls backend, sets cookie, loads user
       setOpen(false);
-      navigate("/dashboard");            // ✅ go to dashboard after login
+      navigate("/dashboard"); // ✅ go to dashboard after login
     } catch (e) {
       setError(e?.response?.data?.error || "Login failed");
     } finally {
       setSubmitting(false);
     }
   };
-  
+
+  const onLogout = async () => {
+    try {
+      await logout();
+      navigate("/", { replace: true });
+    } catch {
+      // ignore
+    }
+  };
+
   return (
     <header>
       <div className="container-fluid py-2 border-bottom d-none d-lg-block">
@@ -80,119 +89,167 @@ export default function Home() {
 
       <div className="container-fluid sticky-top bg-white shadow-sm">
         <div className="container">
-           <Box sx={{ p: 4 }}>
-          <nav className="navbar navbar-expand-lg d-flex align-items-center bg-white navbar-light py-3 py-lg-0">
-            <a href="/" className="navbar-brand">
-              <h1 className="m-0 text-uppercase text-primary fs-1">
-                <i className="fa fa-clinic-medical me-2" />
-                Medinova
-              </h1>
-            </a>
+          <Box sx={{ p: 4 }}>
+            <nav className="navbar navbar-expand-lg d-flex align-items-center bg-white navbar-light py-3 py-lg-0">
+              <a href="/" className="navbar-brand">
+                <h1 className="m-0 text-uppercase text-primary fs-1">
+                  <i className="fa fa-clinic-medical me-2" />
+                  Medinova
+                </h1>
+              </a>
 
-            <button
-              className="navbar-toggler"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#navbarCollapse"
-              aria-controls="navbarCollapse"
-              aria-expanded="false"
-              aria-label="Toggle navigation"
-            >
-              <span className="navbar-toggler-icon" />
-            </button>
+              <button
+                className="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarCollapse"
+                aria-controls="navbarCollapse"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+              >
+                <span className="navbar-toggler-icon" />
+              </button>
 
-            <div className="collapse navbar-collapse" id="navbarCollapse">
-              <div className="navbar-nav ms-auto py-0">
-                <Link to="/" className="nav-item nav-link active">Home</Link>
-                <a href="about.html" className="nav-item nav-link">
-                  About
-                </a>
-                <Link to="/doctors" className="nav-item nav-link"> Doctors  
-                </Link>
-                <a href="price.html" className="nav-item nav-link">
-                  Pricing
-                </a>
+              <div className="collapse navbar-collapse" id="navbarCollapse">
+                <div className="navbar-nav ms-auto py-0">
+                  <Link to="/" className="nav-item nav-link">
+                    Home
+                  </Link>
 
-                <div className="nav-item dropdown">
-                  <a
-                    href="#"
-                    className="nav-link dropdown-toggle"
-                    data-bs-toggle="dropdown"
-                    role="button"
-                    aria-expanded="false"
-                  >
-                    Pages
+                  <a href="about.html" className="nav-item nav-link">
+                    About
                   </a>
-                  <div className="dropdown-menu m-0">
-                    <a href="blog.html" className="dropdown-item">
-                      Blog Grid
+
+                  <Link to="/doctors" className="nav-item nav-link">
+                    Doctors
+                  </Link>
+
+                  <a href="price.html" className="nav-item nav-link">
+                    Pricing
+                  </a>
+
+                  <div className="nav-item dropdown">
+                    <a
+                      href="#"
+                      className="nav-link dropdown-toggle"
+                      data-bs-toggle="dropdown"
+                      role="button"
+                      aria-expanded="false"
+                    >
+                      Pages
                     </a>
-                    <a href="detail.html" className="dropdown-item">
-                      Blog Detail
-                    </a>
-                    <a href="team.html" className="dropdown-item">
-                      The Team
-                    </a>
-                    <a href="testimonial.html" className="dropdown-item">
-                      Testimonial
-                    </a>
-                    <a href="appointment.html" className="dropdown-item">
-                      Appointment
-                    </a>
-                    <a href="search.html" className="dropdown-item">
-                      Search
-                    </a>
+                    <div className="dropdown-menu m-0">
+                      <a href="blog.html" className="dropdown-item">
+                        Blog Grid
+                      </a>
+                      <a href="detail.html" className="dropdown-item">
+                        Blog Detail
+                      </a>
+                      <a href="team.html" className="dropdown-item">
+                        The Team
+                      </a>
+                      <a href="testimonial.html" className="dropdown-item">
+                        Testimonial
+                      </a>
+                      <a href="appointment.html" className="dropdown-item">
+                        Appointment
+                      </a>
+                      <a href="search.html" className="dropdown-item">
+                        Search
+                      </a>
+                    </div>
                   </div>
+
+                  <a href="contact.html" className="nav-item nav-link me-3">
+                    Contact
+                  </a>
+
+                  {/* ✅ Right side auth buttons */}
+                  {!loading && !user && (
+                    <>
+                      <Button
+                        variant="outlined"
+                        sx={{ mr: 1 }}
+                        component={Link}
+                        to="/auth?mode=login"
+                      >
+                        Login
+                      </Button>
+
+                      <Button
+                        variant="contained"
+                        component={Link}
+                        to="/auth?mode=signup"
+                      >
+                        Sign Up
+                      </Button>
+                    </>
+                  )}
+
+                  {!loading && user && (
+                    <>
+                      <Button
+                        variant="outlined"
+                        sx={{ mr: 1 }}
+                        component={Link}
+                        to="/dashboard"
+                      >
+                        Dashboard
+                      </Button>
+
+                      <Button variant="contained" color="error" onClick={onLogout}>
+                        Logout
+                      </Button>
+                    </>
+                  )}
+
+                  {/* ✅ Login Dialog */}
+                  <Dialog
+                    open={open}
+                    onClose={() => setOpen(false)}
+                    maxWidth="xs"
+                    fullWidth
+                  >
+                    <DialogTitle>Login</DialogTitle>
+
+                    <DialogContent sx={{ display: "grid", gap: 2, pt: 1 }}>
+                      <TextField
+                        label="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        autoFocus
+                      />
+                      <TextField
+                        label="Password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+
+                      {error && (
+                        <Typography color="error" variant="body2">
+                          {error}
+                        </Typography>
+                      )}
+                    </DialogContent>
+
+                    <DialogActions sx={{ p: 2 }}>
+                      <Button onClick={() => setOpen(false)} disabled={submitting}>
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={onSubmit}
+                        variant="contained"
+                        disabled={submitting}
+                      >
+                        {submitting ? "Logging in..." : "Login"}
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
                 </div>
-
-                <a href="contact.html" className="nav-item nav-link me-4">
-                  Contact
-                </a>
-                <Button variant="contained" onClick={() => setOpen(true)}>
-        Login
-      </Button>
-
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Login</DialogTitle>
-
-        <DialogContent sx={{ display: "grid", gap: 2, pt: 1 }}>
-          <TextField
-            label="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoFocus
-          />
-          <TextField
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-
-          {error && (
-            <Typography color="error" variant="body2">
-              {error}
-            </Typography>
-          )}
-        </DialogContent>
-
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setOpen(false)}  disabled={submitting}>
-            Cancel
-          </Button>
-          <Button onClick={onSubmit} variant="contained" disabled={submitting}>
-            {submitting ? "Logging in..." : "Login"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-   
- 
-
-
               </div>
-            </div>
-          </nav>
-           </Box>
+            </nav>
+          </Box>
         </div>
       </div>
     </header>

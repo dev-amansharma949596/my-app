@@ -6,8 +6,7 @@ import Footer from "../components/Footer";
 import PriceSlider from "../components/PriceSlider";
 import TeamSlider from "../components/TeamSlider";
 import TestimonialSlider from "../components/TestimonialSlider";  
-import AppointmentModal from "../components/AppointmentModal";
-
+import AppointmentModal from "../components/AppointmentModal"; 
 export default function Home() {
   const [count, setCount] = useState(0);
   const [name, setName] = useState("");  

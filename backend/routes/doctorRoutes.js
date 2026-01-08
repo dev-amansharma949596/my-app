@@ -1,34 +1,24 @@
 import express from "express";
 import Doctor from "../models/Doctor.js";
-import jwt from "jsonwebtoken";
+import { requireAuth, requireAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// --- Your same cookie auth middleware (protected routes) ---
-function requireAuth(req, res, next) {
-  const token = req.cookies.token;
-  if (!token) return res.status(401).json({ error: "missing token" });
-
-  try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
-    next();
-  } catch {
-    return res.status(401).json({ error: "invalid token" });
-  }
-}
-
-// ✅ PUBLIC: list doctors for frontend page
-router.get("/doctors", async (req, res) => {
-  try {
-    const doctors = await Doctor.find().sort({ createdAt: -1 });
-    res.json(doctors);
-  } catch (err) {
-    res.status(500).json({ error: err.message || "Server error" });
-  }
+/**
+ * ✅ PUBLIC: list doctors for frontend page
+ * GET /api/doctors
+ */
+ router.get("/api/doctors", async (req, res) => {
+  const doctors = await Doctor.find().sort({ createdAt: -1 });
+  res.json(doctors);
 });
 
-// ✅ PROTECTED: add doctor from dashboard
-router.post("/admin/doctors", requireAuth, async (req, res) => {
+
+/**
+ * ✅ ADMIN: add doctor from dashboard
+ * POST /admin/doctors
+ */
+router.post("/admin/doctors", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { name, email, mobile, specialist, imageUrl } = req.body;
 
@@ -44,13 +34,12 @@ router.post("/admin/doctors", requireAuth, async (req, res) => {
       imageUrl: imageUrl || "",
     });
 
-    res.status(201).json(created);
+    return res.status(201).json(created);
   } catch (err) {
-    // duplicate email error (if you kept unique index)
     if (err?.code === 11000) {
       return res.status(409).json({ error: "Doctor with this email already exists" });
     }
-    res.status(500).json({ error: err.message || "Server error" });
+    return res.status(500).json({ error: err.message || "Server error" });
   }
 });
 

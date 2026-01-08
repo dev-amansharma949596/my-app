@@ -6,6 +6,8 @@ import cors from "cors";
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import { requireAuth, requireAdmin } from "./middleware/auth.js";
+import doctorRoutes from "./routes/doctorRoutes.js";
+import appointmentRoutes from "./routes/appointmentRoutes.js";
 
 dotenv.config();
 
@@ -24,13 +26,13 @@ app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
 
 app.use(express.json());
-app.use(cookieParser());
-
+app.use(cookieParser()); 
 
 // ✅ Auth endpoints
 app.use("/auth", authRoutes);
-console.log("✅ Mounting /api/users route now...");
-
+app.use("/api/users", requireAuth, requireAdmin, userRoutes);
+app.use(doctorRoutes);
+app.use(appointmentRoutes);
 
 // ✅ Admin endpoints
 app.use("/api/users", requireAuth, requireAdmin, userRoutes);

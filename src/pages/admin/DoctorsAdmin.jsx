@@ -49,7 +49,7 @@ export default function DoctorsAdmin() {
   const [error, setError] = React.useState("");
 
   const load = async () => {
-    const res = await api.get("/doctors"); // ok to reuse public list
+    const res = await api.get("/api/doctors"); // ok to reuse public list
     setDoctors(res.data);
   };
 

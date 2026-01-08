@@ -1,72 +1,68 @@
 import express from "express";
-import jwt from "jsonwebtoken";
 import Appointment from "../models/Appointment.js";
+import Doctor from "../models/Doctor.js";
+import { requireAuth, requireAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// same cookie auth middleware (protected routes)
-function requireAuth(req, res, next) {
-  const token = req.cookies.token;
-  if (!token) return res.status(401).json({ error: "missing token" });
-
+/**
+ * ✅ PUBLIC: create appointment (patient)
+ * POST /api/appointments
+ */
+router.post("/api/appointments", async (req, res) => {
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
-    next();
-  } catch {
-    return res.status(401).json({ error: "invalid token" });
-  }
-}
+    const { name, email, mobile, doctorId, date, time, message } = req.body;
 
-// ✅ PUBLIC: create appointment
-router.post("/appointments", async (req, res) => {
-  try {
-    const { name, email, mobile, doctorId, date, time, reason } = req.body;
-
-    if (!name || !mobile || !doctorId || !date || !time) {
-      return res.status(400).json({ error: "name, mobile, doctorId, date, time are required" });
+    if (!name || !email || !mobile || !doctorId || !date || !time) {
+      return res.status(400).json({ error: "name, email, mobile, doctorId, date, time are required" });
     }
 
-    const scheduledAt = new Date(`${date}T${time}`);
-    if (Number.isNaN(scheduledAt.getTime())) {
-      return res.status(400).json({ error: "Invalid date/time" });
-    }
+    // Optional: verify doctor exists + store doctor name
+    const doctor = await Doctor.findById(doctorId);
+    if (!doctor) return res.status(404).json({ error: "doctor not found" });
 
     const created = await Appointment.create({
       name,
-      email: email || "",
+      email,
       mobile,
       doctorId,
-      scheduledAt,
-      reason: reason || "",
+      doctorName: doctor.name,
+      date,
+      time,
+      message: message || "",
+      status: "pending",
     });
 
-    res.status(201).json(created);
+    return res.status(201).json(created);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Server error" });
+    console.error("POST /api/appointments error:", err);
+    return res.status(500).json({ error: "server error" });
   }
 });
 
-// ✅ ADMIN (protected): list appointments
-router.get("/admin/appointments", requireAuth, async (req, res) => {
+/**
+ * ✅ ADMIN: list all appointments
+ * GET /api/appointments
+ */
+router.get("/api/appointments", requireAuth, requireAdmin, async (req, res) => {
   try {
-    const items = await Appointment.find()
-      .populate("doctorId", "name specialist email mobile imageUrl")
-      .sort({ createdAt: -1 });
-
-    res.json(items);
+    const list = await Appointment.find().sort({ createdAt: -1 });
+    return res.json(list);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Server error" });
+    console.error("GET /api/appointments error:", err);
+    return res.status(500).json({ error: "server error" });
   }
 });
 
-// ✅ ADMIN (protected): update status (optional but useful)
-router.patch("/admin/appointments/:id/status", requireAuth, async (req, res) => {
+/**
+ * ✅ ADMIN: update appointment status
+ * PATCH /api/appointments/:id/status
+ */
+router.patch("/api/appointments/:id/status", requireAuth, requireAdmin, async (req, res) => {
   try {
     const { status } = req.body;
-
-    const allowed = ["pending", "successful", "cancelled"];
-    if (!allowed.includes(status)) {
-      return res.status(400).json({ error: "Invalid status" });
+    if (!["pending", "approved", "rejected"].includes(status)) {
+      return res.status(400).json({ error: "invalid status" });
     }
 
     const updated = await Appointment.findByIdAndUpdate(
@@ -75,9 +71,12 @@ router.patch("/admin/appointments/:id/status", requireAuth, async (req, res) => 
       { new: true }
     );
 
-    res.json(updated);
+    if (!updated) return res.status(404).json({ error: "appointment not found" });
+
+    return res.json(updated);
   } catch (err) {
-    res.status(500).json({ error: err.message || "Server error" });
+    console.error("PATCH /api/appointments/:id/status error:", err);
+    return res.status(500).json({ error: "server error" });
   }
 });
 

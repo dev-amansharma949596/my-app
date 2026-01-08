@@ -16,13 +16,16 @@ import {
   useMediaQuery,
   Button,
 } from "@mui/material";
+
 import PeopleIcon from "@mui/icons-material/People";
 import MenuIcon from "@mui/icons-material/Menu";
 import HomeIcon from "@mui/icons-material/Home";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import EventIcon from "@mui/icons-material/Event";
-import SettingsIcon from "@mui/icons-material/Settings";
+import { AuthContext } from "../context/AuthContext.jsx";
+
+
 
 const drawerWidth = 260;
 
@@ -31,7 +34,6 @@ const navItems = [
   { label: "Users", path: "/dashboard/users", icon: <PeopleIcon /> },
   { label: "Doctors", path: "/dashboard/doctors", icon: <LocalHospitalIcon /> },
   { label: "Appointments", path: "/dashboard/appointments", icon: <EventIcon /> },
-
 ];
 
 function SidebarContent({ onNavigate }) {
@@ -72,6 +74,8 @@ export default function DashboardLayout() {
   const isDesktop = useMediaQuery("(min-width:900px)");
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
+  const { user, logout } = React.useContext(AuthContext);
+
   const toggleMobileDrawer = () => setMobileOpen((v) => !v);
   const closeMobileDrawer = () => setMobileOpen(false);
 
@@ -102,10 +106,33 @@ export default function DashboardLayout() {
             Dashboard
           </Typography>
 
-          {/* Home link in header */}
-          <Button component={Link} to="/" startIcon={<HomeIcon />} variant="outlined" size="small">
-  Home
-</Button>
+          {/* Optional: show logged in user */}
+          {user?.email && (
+            <Typography variant="body2" sx={{ mr: 1 }} color="text.secondary" noWrap>
+              {user.email}
+            </Typography>
+          )}
+
+          {/* Home link */}
+          <Button
+            component={Link}
+            to="/"
+            startIcon={<HomeIcon />}
+            variant="outlined"
+            size="small"
+          >
+            Home
+          </Button>
+
+          {/* Logout */}
+          <Button
+            onClick={logout}
+            variant="contained"
+            size="small"
+            sx={{ ml: 1 }}
+          >
+            Logout
+          </Button>
         </Toolbar>
       </AppBar>
 

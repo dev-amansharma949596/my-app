@@ -45,7 +45,7 @@ export default function DoctorsPublic() {
   React.useEffect(() => {
     (async () => {
       try {
-        const res = await api.get("/doctors"); // ✅ public endpoint
+        const res = await api.get("/api/doctors"); // ✅ public endpoint
         setDoctors(res.data);
       } finally {
         setLoading(false);

@@ -2,22 +2,18 @@ import mongoose from "mongoose";
 
 const appointmentSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true },
-    email: { type: String, trim: true, lowercase: true },
-    mobile: { type: String, required: true, trim: true },
+    name: { type: String, required: true },          // patient name
+    email: { type: String, required: true },
+    mobile: { type: String, required: true },
 
     doctorId: { type: mongoose.Schema.Types.ObjectId, ref: "Doctor", required: true },
+    doctorName: { type: String, default: "" },       // optional convenience
 
-    // store as a Date (best)
-    scheduledAt: { type: Date, required: true },
+    date: { type: String, required: true },          // e.g. "2026-01-05"
+    time: { type: String, required: true },          // e.g. "10:30 AM"
+    message: { type: String, default: "" },
 
-    reason: { type: String, trim: true, default: "" },
-
-    status: {
-      type: String,
-      enum: ["pending", "successful", "cancelled"],
-        default: "pending",
-    },
+    status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
   },
   { timestamps: true }
 );

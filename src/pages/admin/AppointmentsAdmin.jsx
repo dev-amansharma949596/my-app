@@ -15,7 +15,7 @@ export default function AppointmentsAdmin() {
 
   React.useEffect(() => {
     (async () => {
-      const res = await api.get("/admin/appointments");
+      const res = await api.get("/api/appointments");
       setItems(res.data);
     })();
   }, []);
